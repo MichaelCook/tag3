@@ -4,10 +4,10 @@ tag3
 Edit the tags of MP3 files by applying arbitrary Perl expressions.
 
 In the Perl expression:
-    - $_ is the title, artist, album or genre to modify.
-    - $FILE is the name of the MP3 file.
-    - $MMSS is the duration in minutes and seconds.
-    - $SECONDS is the duration in seconds.
+    * $_ is the title, artist, album or genre to modify.
+    * $FILE is the name of the MP3 file.
+    * $MMSS is the duration in minutes and seconds.
+    * $SECONDS is the duration in seconds.
 
 Example:
     tag3 --title='s/^/Podcast: /' podcast*.mp3
