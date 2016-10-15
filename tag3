@@ -11,8 +11,18 @@
 # Example:
 #  tag3 --title='s/^/Podcast: /' podcast*.mp3
 #
-# Insert at the beginning of the title the string "MMDD", the month & day of
-# the last-modification time of each mp3 file.
+# --title -t
+# --artist -a
+# --album -l
+# --genre -g
+# --track -k
+# --comment -c
+# --year -y
+#
+# -tfoo is shorthand for --title='$_="foo"'
+#
+# Example: Insert at the beginning of the title the string "MMDD", the month &
+# day of the last-modification time of each mp3 file.
 #
 #  tag3 --title='($m,$d)=(localtime((stat$FILE)[9]))[4,3];s/^/sprintf"%02d%02d ",$m+1,$d/e' *.mp3
 #
@@ -57,19 +67,44 @@ my @GENRE;
 my @TRACK;
 my @COMMENT;
 my @YEAR;
+my $UPDATE_LENGTH;
 my $CHECK;
 my $VERBOSE;
 my $DEBUG;
 
+my @saved_field_values;
+sub make_setter
+{
+    my ($aref, $value) = @_;
+
+    my $i = @saved_field_values;
+    push @saved_field_values, $value;
+    push @$aref, "\$_ = \$saved_field_values[$i]";
+}
+
 Getopt::Long::config("bundling");
 GetOptions
-("title|t=s" => \@TITLE,
- "artist|a=s" => \@ARTIST,
- "album|l=s" => \@ALBUM,
- "genre|g=s" => \@GENRE,
- "track|k=s" => \@TRACK,
- "comment|c=s" => \@COMMENT,
- "year|y=s" => \@YEAR,
+(
+ # Argument is perl code to eval to modify $_ which contains the field value.
+ "title=s" => \@TITLE,
+ "artist=s" => \@ARTIST,
+ "album=s" => \@ALBUM,
+ "genre=s" => \@GENRE,
+ "track=s" => \@TRACK,
+ "comment=s" => \@COMMENT,
+ "year=s" => \@YEAR,
+
+ # Argument is a string to use for the new value of the field.
+ # For example, -tfoo is shorthand for --title='$_="foo"'
+ "t=s" => sub { make_setter(\@TITLE, $_[1]) },
+ "a=s" => sub { make_setter(\@ARTIST, $_[1]) },
+ "l=s" => sub { make_setter(\@ALBUM, $_[1]) },
+ "g=s" => sub { make_setter(\@GENRE, $_[1]) },
+ "k=s" => sub { make_setter(\@TRACK, $_[1]) },
+ "c=s" => sub { make_setter(\@COMMENT, $_[1]) },
+ "y=s" => sub { make_setter(\@YEAR, $_[1]) },
+
+ "update-length|u" => \$UPDATE_LENGTH,
 
  "check!" => \$CHECK,
  #
@@ -90,59 +125,16 @@ our $FILE;
 our $MMSS;
 our $SECONDS;
 
-sub edit_title;
+sub run_editor
 {
-    local $^W;
-    no strict;
-    eval "sub edit_title { " . join(" ; ", @TITLE) . " }";
-    $@ && die $@;
-}
+    my ($aref) = @_;
 
-sub edit_artist;
-{
+    return unless @$aref;
+    my $code = join " ; ", @$aref;
+    warn "> code: ==>$code<==\n" if $DEBUG;
     local $^W;
     no strict;
-    eval "sub edit_artist { " . join(" ; ", @ARTIST) . " }";
-    $@ && die $@;
-}
-
-sub edit_album;
-{
-    local $^W;
-    no strict;
-    eval "sub edit_album { " . join(" ; ", @ALBUM) . " }";
-    $@ && die $@;
-}
-
-sub edit_genre;
-{
-    local $^W;
-    no strict;
-    eval "sub edit_genre { " . join(" ; ", @GENRE) . " }";
-    $@ && die $@;
-}
-
-sub edit_track;
-{
-    local $^W;
-    no strict;
-    eval "sub edit_track { " . join(" ; ", @TRACK) . " }";
-    $@ && die $@;
-}
-
-sub edit_comment;
-{
-    local $^W;
-    no strict;
-    eval "sub edit_comment { " . join(" ; ", @COMMENT) . " }";
-    $@ && die $@;
-}
-
-sub edit_year;
-{
-    local $^W;
-    no strict;
-    eval "sub edit_year { " . join(" ; ", @YEAR) . " }";
+    eval $code;
     $@ && die $@;
 }
 
@@ -157,6 +149,15 @@ for my $file (@ARGV)
         next;
     }
     my $changed;
+
+    if ($UPDATE_LENGTH)
+    {
+        warn "> $file: update length\n" if $DEBUG;
+        $mp3->config("update_length");
+        #$mp3->config(write_v24 => 1);
+        ++$changed;
+    }
+
     $FILE = $file;
     $MMSS = $mp3->time_mm_ss();
     $SECONDS = $mp3->total_secs_int();
@@ -165,7 +166,7 @@ for my $file (@ARGV)
     warn "> $file: title {$title}\n" if $DEBUG;
     {
         local $_ = $title;
-        edit_title();
+        run_editor \@TITLE;
         if ($_ eq $title)
         {
             warn "> unchanged title '$title'\n" if $DEBUG;
@@ -185,7 +186,7 @@ for my $file (@ARGV)
     warn "> $file: artist {$artist}\n" if $DEBUG;
     {
         local $_ = $artist;
-        edit_artist();
+        run_editor \@ARTIST;
         if ($_ eq $artist)
         {
             warn "> unchanged artist '$artist'\n" if $DEBUG;
@@ -205,7 +206,7 @@ for my $file (@ARGV)
     warn "> $file: album {$album}\n" if $DEBUG;
     {
         local $_ = $album;
-        edit_album();
+        run_editor \@ALBUM;
         if ($_ eq $album)
         {
             warn "> unchanged album '$album'\n" if $DEBUG;
@@ -225,7 +226,7 @@ for my $file (@ARGV)
     warn "> $file: genre {$genre}\n" if $DEBUG;
     {
         local $_ = $genre;
-        edit_genre();
+        run_editor \@GENRE;
         if ($_ eq $genre)
         {
             warn "> unchanged genre '$genre'\n" if $DEBUG;
@@ -245,7 +246,7 @@ for my $file (@ARGV)
     warn "> $file: track {$track}\n" if $DEBUG;
     {
         local $_ = $track;
-        edit_track();
+        run_editor \@TRACK;
         if ($_ eq $track)
         {
             warn "> unchanged track '$track'\n" if $DEBUG;
@@ -265,7 +266,7 @@ for my $file (@ARGV)
     warn "> $file: comment {$comment}\n" if $DEBUG;
     {
         local $_ = $comment;
-        edit_comment();
+        run_editor \@COMMENT;
         if ($_ eq $comment)
         {
             warn "> unchanged comment '$comment'\n" if $DEBUG;
@@ -285,7 +286,7 @@ for my $file (@ARGV)
     warn "> $file: year {$year}\n" if $DEBUG;
     {
         local $_ = $year;
-        edit_year();
+        run_editor \@YEAR;
         if ($_ eq $year)
         {
             warn "> unchanged year '$year'\n" if $DEBUG;
