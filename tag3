@@ -31,25 +31,21 @@
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY MICHAEL COOK ''AS IS'' AND ANY EXPRESS OR
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-# EVENT SHALL MICHAEL COOK OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-# The views and conclusions contained in the software and documentation are
-# those of the authors and should not be interpreted as representing official
-# policies, either expressed or implied, of Michael Cook.
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 use strict;
 use warnings;
 use Getopt::Long;
-use MP3::Tag;			# apt: libmp3-tag-perl
+use MP3::Tag;                   # apt: libmp3-tag-perl
 
 my ($THIS) = $0 =~ m%([^/]+)$%;
 my $USAGE = "usage: $THIS [options] files.mp3\n";
@@ -156,9 +152,9 @@ for my $file (@ARGV)
     my $mp3 = MP3::Tag->new($file);
     unless ($mp3)
     {
-	warn "$file: $!";
-	$exit = 1;
-	next;
+        warn "$file: $!";
+        $exit = 1;
+        next;
     }
     my $changed;
     $FILE = $file;
@@ -168,152 +164,152 @@ for my $file (@ARGV)
     my $title = $mp3->title();
     warn "> $file: title {$title}\n" if $DEBUG;
     {
-	local $_ = $title;
-	edit_title();
-	if ($_ eq $title)
-	{
-	    warn "> unchanged title '$title'\n" if $DEBUG;
-	}
-	else
-	{
-	    warn "> $file: title {$_}\n" if $DEBUG;
-	    $mp3->title_set($_);
-	    ++$changed;
-	    print "Title : \"$title\"\n",
-		  "      : \"$_\"\n"
-		      if $VERBOSE;
-	}
+        local $_ = $title;
+        edit_title();
+        if ($_ eq $title)
+        {
+            warn "> unchanged title '$title'\n" if $DEBUG;
+        }
+        else
+        {
+            warn "> $file: title {$_}\n" if $DEBUG;
+            $mp3->title_set($_);
+            ++$changed;
+            print "Title : \"$title\"\n",
+                  "      : \"$_\"\n"
+                      if $VERBOSE;
+        }
     }
 
     my $artist = $mp3->artist();
     warn "> $file: artist {$artist}\n" if $DEBUG;
     {
-	local $_ = $artist;
-	edit_artist();
-	if ($_ eq $artist)
-	{
-	    warn "> unchanged artist '$artist'\n" if $DEBUG;
-	}
-	else
-	{
-	    warn "> $file: artist {$_}\n" if $DEBUG;
-	    $mp3->artist_set($_);
-	    ++$changed;
-	    print "Artist: \"$artist\"\n",
-		  "      : \"$_\"\n"
-		      if $VERBOSE;
-	}
+        local $_ = $artist;
+        edit_artist();
+        if ($_ eq $artist)
+        {
+            warn "> unchanged artist '$artist'\n" if $DEBUG;
+        }
+        else
+        {
+            warn "> $file: artist {$_}\n" if $DEBUG;
+            $mp3->artist_set($_);
+            ++$changed;
+            print "Artist: \"$artist\"\n",
+                  "      : \"$_\"\n"
+                      if $VERBOSE;
+        }
     }
 
     my $album = $mp3->album();
     warn "> $file: album {$album}\n" if $DEBUG;
     {
-	local $_ = $album;
-	edit_album();
-	if ($_ eq $album)
-	{
-	    warn "> unchanged album '$album'\n" if $DEBUG;
-	}
-	else
-	{
-	    warn "> $file: album {$_}\n" if $DEBUG;
-	    $mp3->album_set($_);
-	    ++$changed;
-	    print "Album : \"$album\"\n",
-		  "      : \"$_\"\n"
-		      if $VERBOSE;
-	}
+        local $_ = $album;
+        edit_album();
+        if ($_ eq $album)
+        {
+            warn "> unchanged album '$album'\n" if $DEBUG;
+        }
+        else
+        {
+            warn "> $file: album {$_}\n" if $DEBUG;
+            $mp3->album_set($_);
+            ++$changed;
+            print "Album : \"$album\"\n",
+                  "      : \"$_\"\n"
+                      if $VERBOSE;
+        }
     }
 
     my $genre = $mp3->genre();
     warn "> $file: genre {$genre}\n" if $DEBUG;
     {
-	local $_ = $genre;
-	edit_genre();
-	if ($_ eq $genre)
-	{
-	    warn "> unchanged genre '$genre'\n" if $DEBUG;
-	}
-	else
-	{
-	    warn "> $file: genre {$_}\n" if $DEBUG;
-	    $mp3->genre_set($_);
-	    ++$changed;
-	    print "Genre : \"$genre\"\n",
-		  "      : \"$_\"\n"
-		      if $VERBOSE;
-	}
+        local $_ = $genre;
+        edit_genre();
+        if ($_ eq $genre)
+        {
+            warn "> unchanged genre '$genre'\n" if $DEBUG;
+        }
+        else
+        {
+            warn "> $file: genre {$_}\n" if $DEBUG;
+            $mp3->genre_set($_);
+            ++$changed;
+            print "Genre : \"$genre\"\n",
+                  "      : \"$_\"\n"
+                      if $VERBOSE;
+        }
     }
 
     my $track = $mp3->track();
     warn "> $file: track {$track}\n" if $DEBUG;
     {
-	local $_ = $track;
-	edit_track();
-	if ($_ eq $track)
-	{
-	    warn "> unchanged track '$track'\n" if $DEBUG;
-	}
-	else
-	{
-	    warn "> $file: track {$_}\n" if $DEBUG;
-	    $mp3->track_set($_);
-	    ++$changed;
-	    print "Track : \"$track\"\n",
-		  "      : \"$_\"\n"
-		      if $VERBOSE;
-	}
+        local $_ = $track;
+        edit_track();
+        if ($_ eq $track)
+        {
+            warn "> unchanged track '$track'\n" if $DEBUG;
+        }
+        else
+        {
+            warn "> $file: track {$_}\n" if $DEBUG;
+            $mp3->track_set($_);
+            ++$changed;
+            print "Track : \"$track\"\n",
+                  "      : \"$_\"\n"
+                      if $VERBOSE;
+        }
     }
 
     my $comment = $mp3->comment();
     warn "> $file: comment {$comment}\n" if $DEBUG;
     {
-	local $_ = $comment;
-	edit_comment();
-	if ($_ eq $comment)
-	{
-	    warn "> unchanged comment '$comment'\n" if $DEBUG;
-	}
-	else
-	{
-	    warn "> $file: comment {$_}\n" if $DEBUG;
-	    $mp3->comment_set($_);
-	    ++$changed;
-	    print "Comment : \"$comment\"\n",
-		  "        : \"$_\"\n"
-		      if $VERBOSE;
-	}
+        local $_ = $comment;
+        edit_comment();
+        if ($_ eq $comment)
+        {
+            warn "> unchanged comment '$comment'\n" if $DEBUG;
+        }
+        else
+        {
+            warn "> $file: comment {$_}\n" if $DEBUG;
+            $mp3->comment_set($_);
+            ++$changed;
+            print "Comment : \"$comment\"\n",
+                  "        : \"$_\"\n"
+                      if $VERBOSE;
+        }
     }
 
     my $year = $mp3->year();
     warn "> $file: year {$year}\n" if $DEBUG;
     {
-	local $_ = $year;
-	edit_year();
-	if ($_ eq $year)
-	{
-	    warn "> unchanged year '$year'\n" if $DEBUG;
-	}
-	else
-	{
-	    warn "> $file: year {$_}\n" if $DEBUG;
-	    $mp3->year_set($_);
-	    ++$changed;
-	    print "Year : \"$year\"\n",
-		  "     : \"$_\"\n"
-		      if $VERBOSE;
-	}
+        local $_ = $year;
+        edit_year();
+        if ($_ eq $year)
+        {
+            warn "> unchanged year '$year'\n" if $DEBUG;
+        }
+        else
+        {
+            warn "> $file: year {$_}\n" if $DEBUG;
+            $mp3->year_set($_);
+            ++$changed;
+            print "Year : \"$year\"\n",
+                  "     : \"$_\"\n"
+                      if $VERBOSE;
+        }
     }
 
     if ($changed)
     {
-	print "Updating tags in $file\n"
-	    if $VERBOSE;
-	local $SIG{__WARN__} = sub {
-	    print STDERR @_;
-	    $exit = 1;
-	};
-	$mp3->update_tags;
+        print "Updating tags in $file\n"
+            if $VERBOSE;
+        local $SIG{__WARN__} = sub {
+            print STDERR @_;
+            $exit = 1;
+        };
+        $mp3->update_tags;
     }
     warn "> close $file\n" if $DEBUG;
     $mp3->close;
