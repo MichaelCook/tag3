@@ -68,6 +68,7 @@ my @TRACK;
 my @COMMENT;
 my @YEAR;
 my $UPDATE_LENGTH;
+my $DRYRUN;
 my $CHECK;
 my $VERBOSE;
 my $DEBUG;
@@ -106,6 +107,8 @@ GetOptions
 
  "update-length|u" => \$UPDATE_LENGTH,
 
+ "dry-run|n" => \$DRYRUN,
+
  "check!" => \$CHECK,
  #
  # Verify this script has what it needs to run.
@@ -125,18 +128,37 @@ our $FILE;
 our $MMSS;
 our $SECONDS;
 
-sub run_editor
+sub make_editor
 {
-    my ($aref) = @_;
+    my ($name, $expr) = @_;
 
-    return unless @$aref;
-    my $code = join " ; ", @$aref;
-    warn "> code: ==>$code<==\n" if $DEBUG;
+    $expr = join ";\n\t", @$expr;
+
+    # This odd looking "LOOP:" construct is used so "last" will work the way
+    # you'd expect.  See perlsyn(1), search for "LOOP:".
+    $expr = <<EOF;
+        sub edit_$name {
+            LOOP: {
+                do {
+                    $expr
+                } while 0;
+            }
+        }
+EOF
+    warn "> expr ==>$expr<==" if $DEBUG;
     local $^W;
     no strict;
-    eval $code;
-    $@ && die $@;
+    eval $expr;
+    $@ && die "($name) $@";
 }
+
+make_editor "title", \@TITLE;
+make_editor "artist", \@ARTIST;
+make_editor "album", \@ALBUM;
+make_editor "genre", \@GENRE;
+make_editor "track", \@TRACK;
+make_editor "comment", \@COMMENT;
+make_editor "year", \@YEAR;
 
 my $exit = 0;
 for my $file (@ARGV)
@@ -153,8 +175,11 @@ for my $file (@ARGV)
     if ($UPDATE_LENGTH)
     {
         warn "> $file: update length\n" if $DEBUG;
-        $mp3->config("update_length");
-        #$mp3->config(write_v24 => 1);
+        unless ($DRYRUN)
+        {
+            $mp3->config("update_length");
+            #$mp3->config(write_v24 => 1);
+        }
         ++$changed;
     }
 
@@ -166,7 +191,7 @@ for my $file (@ARGV)
     warn "> $file: title {$title}\n" if $DEBUG;
     {
         local $_ = $title;
-        run_editor \@TITLE;
+        edit_title();
         if ($_ eq $title)
         {
             warn "> unchanged title '$title'\n" if $DEBUG;
@@ -174,7 +199,8 @@ for my $file (@ARGV)
         else
         {
             warn "> $file: title {$_}\n" if $DEBUG;
-            $mp3->title_set($_);
+            $mp3->title_set($_)
+                unless $DRYRUN;
             ++$changed;
             print "Title : \"$title\"\n",
                   "      : \"$_\"\n"
@@ -186,7 +212,7 @@ for my $file (@ARGV)
     warn "> $file: artist {$artist}\n" if $DEBUG;
     {
         local $_ = $artist;
-        run_editor \@ARTIST;
+        edit_artist();
         if ($_ eq $artist)
         {
             warn "> unchanged artist '$artist'\n" if $DEBUG;
@@ -194,7 +220,8 @@ for my $file (@ARGV)
         else
         {
             warn "> $file: artist {$_}\n" if $DEBUG;
-            $mp3->artist_set($_);
+            $mp3->artist_set($_)
+                unless $DRYRUN;
             ++$changed;
             print "Artist: \"$artist\"\n",
                   "      : \"$_\"\n"
@@ -206,7 +233,7 @@ for my $file (@ARGV)
     warn "> $file: album {$album}\n" if $DEBUG;
     {
         local $_ = $album;
-        run_editor \@ALBUM;
+        edit_album();
         if ($_ eq $album)
         {
             warn "> unchanged album '$album'\n" if $DEBUG;
@@ -214,7 +241,8 @@ for my $file (@ARGV)
         else
         {
             warn "> $file: album {$_}\n" if $DEBUG;
-            $mp3->album_set($_);
+            $mp3->album_set($_)
+                unless $DRYRUN;
             ++$changed;
             print "Album : \"$album\"\n",
                   "      : \"$_\"\n"
@@ -226,7 +254,7 @@ for my $file (@ARGV)
     warn "> $file: genre {$genre}\n" if $DEBUG;
     {
         local $_ = $genre;
-        run_editor \@GENRE;
+        edit_genre();
         if ($_ eq $genre)
         {
             warn "> unchanged genre '$genre'\n" if $DEBUG;
@@ -234,7 +262,8 @@ for my $file (@ARGV)
         else
         {
             warn "> $file: genre {$_}\n" if $DEBUG;
-            $mp3->genre_set($_);
+            $mp3->genre_set($_)
+                unless $DRYRUN;
             ++$changed;
             print "Genre : \"$genre\"\n",
                   "      : \"$_\"\n"
@@ -246,7 +275,7 @@ for my $file (@ARGV)
     warn "> $file: track {$track}\n" if $DEBUG;
     {
         local $_ = $track;
-        run_editor \@TRACK;
+        edit_track();
         if ($_ eq $track)
         {
             warn "> unchanged track '$track'\n" if $DEBUG;
@@ -254,7 +283,8 @@ for my $file (@ARGV)
         else
         {
             warn "> $file: track {$_}\n" if $DEBUG;
-            $mp3->track_set($_);
+            $mp3->track_set($_)
+                unless $DRYRUN;
             ++$changed;
             print "Track : \"$track\"\n",
                   "      : \"$_\"\n"
@@ -266,7 +296,7 @@ for my $file (@ARGV)
     warn "> $file: comment {$comment}\n" if $DEBUG;
     {
         local $_ = $comment;
-        run_editor \@COMMENT;
+        edit_comment();
         if ($_ eq $comment)
         {
             warn "> unchanged comment '$comment'\n" if $DEBUG;
@@ -274,7 +304,8 @@ for my $file (@ARGV)
         else
         {
             warn "> $file: comment {$_}\n" if $DEBUG;
-            $mp3->comment_set($_);
+            $mp3->comment_set($_)
+                unless $DRYRUN;
             ++$changed;
             print "Comment : \"$comment\"\n",
                   "        : \"$_\"\n"
@@ -286,7 +317,7 @@ for my $file (@ARGV)
     warn "> $file: year {$year}\n" if $DEBUG;
     {
         local $_ = $year;
-        run_editor \@YEAR;
+        edit_year();
         if ($_ eq $year)
         {
             warn "> unchanged year '$year'\n" if $DEBUG;
@@ -294,7 +325,8 @@ for my $file (@ARGV)
         else
         {
             warn "> $file: year {$_}\n" if $DEBUG;
-            $mp3->year_set($_);
+            $mp3->year_set($_)
+                unless $DRYRUN;
             ++$changed;
             print "Year : \"$year\"\n",
                   "     : \"$_\"\n"
@@ -302,7 +334,7 @@ for my $file (@ARGV)
         }
     }
 
-    if ($changed)
+    if ($changed && ! $DRYRUN)
     {
         print "Updating tags in $file\n"
             if $VERBOSE;
