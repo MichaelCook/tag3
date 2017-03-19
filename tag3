@@ -70,7 +70,7 @@ my @YEAR;
 my $UPDATE_LENGTH;
 my $DRYRUN;
 my $CHECK;
-my $VERBOSE;
+my $QUIET;
 my $DEBUG;
 
 my @saved_field_values;
@@ -115,7 +115,7 @@ GetOptions
  # Validates any "use" directives and any dependencies on external programs.
  #
 
- "verbose|v" => \$VERBOSE,
+ "quiet|q" => \$QUIET,
  "debug!" => \$DEBUG,
 )
 or die $USAGE;
@@ -204,7 +204,7 @@ for my $file (@ARGV)
             ++$changed;
             print "Title : \"$title\"\n",
                   "      : \"$_\"\n"
-                      if $VERBOSE;
+                      unless $QUIET;
         }
     }
 
@@ -225,7 +225,7 @@ for my $file (@ARGV)
             ++$changed;
             print "Artist: \"$artist\"\n",
                   "      : \"$_\"\n"
-                      if $VERBOSE;
+                      unless $QUIET;
         }
     }
 
@@ -246,7 +246,7 @@ for my $file (@ARGV)
             ++$changed;
             print "Album : \"$album\"\n",
                   "      : \"$_\"\n"
-                      if $VERBOSE;
+                      unless $QUIET;
         }
     }
 
@@ -267,7 +267,7 @@ for my $file (@ARGV)
             ++$changed;
             print "Genre : \"$genre\"\n",
                   "      : \"$_\"\n"
-                      if $VERBOSE;
+                      unless $QUIET;
         }
     }
 
@@ -288,7 +288,7 @@ for my $file (@ARGV)
             ++$changed;
             print "Track : \"$track\"\n",
                   "      : \"$_\"\n"
-                      if $VERBOSE;
+                      unless $QUIET;
         }
     }
 
@@ -309,7 +309,7 @@ for my $file (@ARGV)
             ++$changed;
             print "Comment : \"$comment\"\n",
                   "        : \"$_\"\n"
-                      if $VERBOSE;
+                      unless $QUIET;
         }
     }
 
@@ -330,14 +330,14 @@ for my $file (@ARGV)
             ++$changed;
             print "Year : \"$year\"\n",
                   "     : \"$_\"\n"
-                      if $VERBOSE;
+                      unless $QUIET;
         }
     }
 
     if ($changed && ! $DRYRUN)
     {
         print "Updating tags in $file\n"
-            if $VERBOSE;
+            unless $QUIET;
         local $SIG{__WARN__} = sub {
             print STDERR @_;
             $exit = 1;
