@@ -122,7 +122,14 @@ or die $USAGE;
 
 exit 0 if $CHECK;
 
-@ARGV == 0 and die $USAGE;
+binmode(STDOUT, ":utf8");
+binmode(STDERR, ":utf8");
+
+unless (@ARGV)
+{
+    @ARGV = glob "*.mp3";
+    @ARGV or die "No files *.mp3";
+}
 
 our $FILE;
 our $MMSS;
@@ -339,8 +346,8 @@ for my $file (@ARGV)
         print "Updating tags in $file\n"
             unless $QUIET;
         local $SIG{__WARN__} = sub {
-            print STDERR @_;
-            $exit = 1;
+            warn "> warning |@_| from update_tags"
+                if $DEBUG;
         };
         $mp3->update_tags;
     }
