@@ -185,10 +185,11 @@ for my $file (@ARGV)
         unless ($DRYRUN)
         {
             $mp3->config("update_length");
-            #$mp3->config(write_v24 => 1);
         }
         ++$changed;
     }
+
+    $mp3->config(write_v24 => 1);
 
     $FILE = $file;
     $MMSS = $mp3->time_mm_ss();
