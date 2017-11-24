@@ -105,6 +105,17 @@ GetOptions
  "c=s" => sub { make_setter(\@COMMENT, $_[1]) },
  "y=s" => sub { make_setter(\@YEAR, $_[1]) },
 
+ "clean|x" => sub {
+     my $clean = 's/\s+/ /g; s/^ //; s/ $//';
+     push @TITLE, $clean;
+     push @ARTIST, $clean;
+     push @ALBUM, $clean;
+     push @GENRE, $clean;
+     push @TRACK, $clean;
+     push @COMMENT, $clean;
+     push @YEAR, $clean;
+ },
+
  "update-length|u" => \$UPDATE_LENGTH,
 
  "dry-run|n" => \$DRYRUN,
