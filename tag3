@@ -21,6 +21,8 @@
 #
 # -tfoo is shorthand for --title='$_="foo"'
 #
+# `--comment none` is shorthand for `--comment '$_ = ""'`.
+#
 # Example: Insert at the beginning of the title the string "MMDD", the month &
 # day of the last-modification time of each mp3 file.
 #
@@ -105,8 +107,10 @@ GetOptions
  "c=s" => sub { make_setter(\@COMMENT, $_[1]) },
  "y=s" => sub { make_setter(\@YEAR, $_[1]) },
 
- "clean|x" => sub {
-     my $clean = 's/\s+/ /g; s/^ //; s/ $//';
+ # Cleanup the tags by deleting non-ASCII, non-printable characters.  They
+ # often cause problems for the various tools we use.
+ "ascii" => sub {
+     my $clean = 's/[^ -~]//g';
      push @TITLE, $clean;
      push @ARTIST, $clean;
      push @ALBUM, $clean;
@@ -142,6 +146,20 @@ unless (@ARGV)
     @ARGV or die "No files *.mp3";
 }
 
+if ($DEBUG)
+{
+    warn "> saved_field_values:\n";
+    for (my $i = 0; $i < @saved_field_values; ++$i)
+    {
+        warn "> [$i] = '$saved_field_values[$i]'\n";
+    }
+}
+
+sub none
+{
+    $_ = "";
+}
+
 our $FILE;
 our $MMSS;
 our $SECONDS;
@@ -156,6 +174,8 @@ sub make_editor
     # you'd expect.  See perlsyn(1), search for "LOOP:".
     $expr = <<EOF;
         sub edit_$name {
+            no strict;
+            no warnings;
             LOOP: {
                 do {
                     $expr
