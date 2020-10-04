@@ -373,7 +373,12 @@ for my $file (@ARGV)
         }
     }
 
-    if ($changed && ! $DRYRUN)
+    if (! $changed)
+    {
+        print "Unchanged tags in $file\n"
+            unless $QUIET;
+    }
+    elsif (! $DRYRUN)
     {
         print "Updating tags in $file\n"
             unless $QUIET;
